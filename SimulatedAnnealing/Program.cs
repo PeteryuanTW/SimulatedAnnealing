@@ -7,9 +7,9 @@ Wo.Add(new List<string> { "wo3", "05", "30", "10", "015"});
 Wo.Add(new List<string> { "wo4", "30", "10", "05", "050"});
 Wo.Add(new List<string> { "wo5", "20", "10", "50", "100"});
 Console.WriteLine("Delay at first: "+ GetTotalDelayTime(Wo));
-int tryTimes = 2000;
-
-while (tryTimes >= 0)
+int tryTimes = 100000;
+int counter = 1;
+while (counter <= tryTimes)
 {
     Random r = new Random();
     int x = r.Next(0, Wo.Count);
@@ -21,21 +21,21 @@ while (tryTimes >= 0)
 
     if (GetTotalDelayTime(ListSwap(Wo, x, y)) < GetTotalDelayTime(Wo))
     {
-        Console.WriteLine(GetTotalDelayTime(ListSwap(Wo, x, y)) + " is less than " + GetTotalDelayTime(Wo));
+        Console.WriteLine(GetTotalDelayTime(ListSwap(Wo, x, y)) + " is less than " + GetTotalDelayTime(Wo)+" at "+ counter + " rounds");
+        for (int i = 0; i < Wo.Count; i++)
+        {
+            for (int j = 0; j < Wo[i].Count; j++)
+            {
+                Console.Write(Wo[i][j] + " | ");
+            }
+            Console.WriteLine("");
+        }
         Wo = ListSwap(Wo, x, y);
     }
-    tryTimes--;
+    counter++;
 }
 
-Console.WriteLine("final result: " + GetTotalDelayTime(Wo));
-for (int i = 0; i < Wo.Count; i++)
-{
-    for (int j = 0; j < Wo[i].Count; j++)
-    {
-        Console.Write(Wo[i][j]+" | ");
-    }
-    Console.WriteLine("");
-}
+
 
 
 
@@ -65,21 +65,37 @@ List<List<string>> ListSwap(List<List<string>> source, int a, int b)
 int GetTotalDelayTime(List<List<string>> wo)
 {
     int res = 0;
+    int tmp;
+    int dueTime;
     for (int i = 0; i < wo.Count; i++)//each wo
     {
-        List<int> eachStationTime = new List<int> {0,0,0};
-        for (int j = i; j >= 0; j--)//for previous wo
+        dueTime = int.Parse(wo[i][^1]);
+        List<int> tmpCTList = new();
+        for (int j = 1; j < wo[i].Count - 1; j++)
         {
-            
-            for (int k = 1; k <= 3; k++)//for each station time until now
+            if (int.Parse(wo[i][j]) != 0)
             {
-                eachStationTime[k-1] += int.Parse(wo[j][k]);
+                tmp = 0;
+                for (int k = i - 1; k >= 0; k--)
+                {
+                    tmp += int.Parse(wo[k][j]);
+                }
+                tmpCTList.Add(tmp);
+                tmpCTList.Add(int.Parse(wo[i][j]));
             }
-            
         }
-        int x = Max(eachStationTime) > int.Parse(wo[i][4]) ? Max(eachStationTime) - int.Parse(wo[i][4]) : 0;
-        //Console.WriteLine(x);
-        res += x;
+
+        int preTime = 0;
+        for (int l = 0; l < tmpCTList.Count; l += 2)//pre, ct
+        {
+            preTime = preTime > tmpCTList[l] ? preTime : tmpCTList[l];
+            preTime += tmpCTList[l + 1];
+        }
+
+
+
+        preTime = preTime > dueTime ? preTime - dueTime : 0;
+        res += preTime;
     }
     //Console.WriteLine(res); 
     return res;
